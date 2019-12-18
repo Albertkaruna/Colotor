@@ -1,0 +1,39 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class ColDirCheckIn : MonoBehaviour
+{
+    private PlayerController PlayerControl;
+
+    // Use this for initialization
+    void Start()
+    {
+        PlayerControl = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (gameObject.name == "1")
+            PlayerControl.CanMoveNX = false;
+        if (gameObject.name == "2")
+            PlayerControl.CanMoveX = false;
+        if (gameObject.name == "3")
+            PlayerControl.CanMoveY = false;
+        if (gameObject.name == "4")
+            PlayerControl.CanMoveNY = false;
+    }
+
+    void OnTriggerExit2D(Collider2D col)
+    {
+        PlayerControl.CanMoveX = true;
+        PlayerControl.CanMoveNX = true;
+        PlayerControl.CanMoveY = true;
+        PlayerControl.CanMoveNY = true;
+    }
+}

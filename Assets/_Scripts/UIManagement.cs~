@@ -1,0 +1,548 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.SceneManagement;
+using System.Linq.Expressions;
+using System.Diagnostics;
+using System.IO;
+using System.Net.NetworkInformation;
+using UnityEngine.UI;
+using UnityEditor;
+
+public class UIManagement : MonoBehaviour
+{
+
+    public static UIManagement instance;
+
+    //    Toggles the setting button functionality
+    private bool SettingsToggle = true;
+   
+    public AudioSource MusicSrc, SoundSrc;
+    private bool s, ss;
+    public AudioClip[] BGClips;
+    public AudioClip Victory, Failed, ButtonClick;
+    public Sprite Sound1, Sound2, Music1, Music2;
+    public Image MusicImage, SoundImage;
+
+
+    void Awake()
+    {
+        if (instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        s = true;
+        ss = true;
+
+    }
+
+
+    // Use this for initialization
+    void Start()
+    {
+	
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+
+
+    // Play button function
+    public void Play(GameObject PlayButton)
+    {
+        ButtonClickSound(ButtonClick);
+        PlayButton.SetActive(false);
+        GameController.instance.SettingBtn.gameObject.SetActive(false);
+        GameController.instance.PlayBtnStuff.GetComponent<Animator>().SetBool("play", true);
+    }
+
+    public void Settings(GameObject SettingsButton)
+    {
+        StartCoroutine(SettingsControl());
+    }
+
+
+    public void Facebook()
+    {
+        ButtonClickSound(ButtonClick);
+        Application.OpenURL("https://www.facebook.com/HyperZeta-522463037937722");
+    }
+
+    public void Twitter()
+    {
+        ButtonClickSound(ButtonClick);
+        Application.OpenURL("https://twitter.com/hyper_zeta");
+    }
+
+
+
+    void MusicSound()
+    {
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            MusicSrc.enabled = false;
+            s = false;
+            MusicImage.sprite = Music2;
+        }
+        if (PlayerPrefs.GetInt("Sound") == 1)
+        {
+            SoundSrc.enabled = false;
+            ss = false;
+            SoundImage.sprite = Sound2;
+        }
+    }
+
+
+    public void SoundBtn(Image b)
+    {
+        ButtonClickSound(ButtonClick);
+        SoundSrc.enabled = !SoundSrc.enabled;
+        if (ss)
+        {
+            ss = false;
+            b.sprite = Sound2;
+            PlayerPrefs.SetInt("Sound", 1);
+        }
+        else if (!ss)
+        {
+            ss = true;
+            b.sprite = Sound1;
+            MusicSrc.Play();
+            PlayerPrefs.SetInt("Sound", 0);
+        }
+    }
+
+    public void MusicBtn(Image b)
+    {
+        ButtonClickSound(ButtonClick);
+        MusicSrc.enabled = !MusicSrc.enabled;
+        if (s)
+        {
+            s = false;
+            b.sprite = Music2;
+            PlayerPrefs.SetInt("Music", 1);
+        }
+        else if (!s)
+        {
+            s = true;
+            b.sprite = Music1;
+            MusicSrc.Play();
+            PlayerPrefs.SetInt("Music", 0);
+        }
+    }
+
+    public void Exit()
+    {
+        ButtonClickSound(ButtonClick);
+
+        Application.Quit();
+    }
+
+
+    void ButtonClickSound(AudioClip clip)
+    {
+        SoundSrc.PlayOneShot(clip);
+    }
+
+
+
+
+
+
+
+    IEnumerator SettingsControl()
+    {
+        Animator anim = GameController.instance.SettingPanel.GetComponent<Animator>();
+        if (SettingsToggle)
+        {
+            SettingsToggle = false;
+            yield return new WaitForSeconds(0.2f);
+            anim.SetInteger("settings", 1);
+            yield return new WaitForSeconds(0.4f);
+            anim.SetInteger("settings", 3);
+        }
+        else
+        {
+            SettingsToggle = true;
+            yield return new WaitForSeconds(0.2f);
+            anim.SetInteger("settings", 4);
+            yield return new WaitForSeconds(0.4f);
+            anim.SetInteger("settings", 2);
+        }
+    }
+
+    public void  WorldOneStart(GameObject LVL)
+    {
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(1, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(1, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(1, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(1, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(1, 5, -40));
+        }
+    }
+
+    public void  WorldTwoStart(GameObject LVL)
+    {
+		
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(2, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(2, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(2, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(2, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(2, 5, -40));
+        }
+        else if (LVL.name == "6")
+        {
+            StartCoroutine(HideUnwantedThings(2, 6, -50));
+        }
+    }
+
+    public void  WorldThreeStart(GameObject LVL)
+    {
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(3, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(3, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(3, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(3, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(3, 5, -40));
+        }
+        else if (LVL.name == "6")
+        {
+            StartCoroutine(HideUnwantedThings(3, 6, -50));
+        }
+        else if (LVL.name == "7")
+        {
+            StartCoroutine(HideUnwantedThings(3, 7, -60));
+        }
+        else if (LVL.name == "8")
+        {
+            StartCoroutine(HideUnwantedThings(3, 8, -70));
+        }
+    }
+
+    public void  WorldFourStart(GameObject LVL)
+    {
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(4, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(4, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(4, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(4, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(4, 5, -40));
+        }
+        else if (LVL.name == "6")
+        {
+            StartCoroutine(HideUnwantedThings(4, 6, -50));
+        }
+        else if (LVL.name == "7")
+        {
+            StartCoroutine(HideUnwantedThings(4, 7, -60));
+        }
+        else if (LVL.name == "8")
+        {
+            StartCoroutine(HideUnwantedThings(4, 8, -70));
+        }
+    }
+
+    public void  WorldFiveStart(GameObject LVL)
+    {
+
+
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(5, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(5, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(5, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(5, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(5, 5, -40));
+        }
+        else if (LVL.name == "6")
+        {
+            StartCoroutine(HideUnwantedThings(5, 6, -50));
+        }
+        else if (LVL.name == "7")
+        {
+            StartCoroutine(HideUnwantedThings(5, 7, -60));
+        }
+        else if (LVL.name == "8")
+        {
+            StartCoroutine(HideUnwantedThings(5, 8, -70));
+        }
+        else if (LVL.name == "9")
+        {
+            StartCoroutine(HideUnwantedThings(5, 9, -80));
+        }
+    }
+
+    public void  WorldSixStart(GameObject LVL)
+    {
+        if (LVL.name == "1")
+        {
+            StartCoroutine(HideUnwantedThings(6, 1, 0));
+        }
+        else if (LVL.name == "2")
+        {
+            StartCoroutine(HideUnwantedThings(6, 2, -10));
+        }
+        else if (LVL.name == "3")
+        {
+            StartCoroutine(HideUnwantedThings(6, 3, -20));
+        }
+        else if (LVL.name == "4")
+        {
+            StartCoroutine(HideUnwantedThings(6, 4, -30));
+        }
+        else if (LVL.name == "5")
+        {
+            StartCoroutine(HideUnwantedThings(6, 5, -40));
+        }
+        else if (LVL.name == "6")
+        {
+            StartCoroutine(HideUnwantedThings(6, 6, -50));
+        }
+        else if (LVL.name == "7")
+        {
+            StartCoroutine(HideUnwantedThings(6, 7, -60));
+        }
+        else if (LVL.name == "8")
+        {
+            StartCoroutine(HideUnwantedThings(6, 8, -70));
+        }
+        else if (LVL.name == "9")
+        {
+            StartCoroutine(HideUnwantedThings(6, 9, -80));
+        }
+        else if (LVL.name == "10")
+        {
+            StartCoroutine(HideUnwantedThings(6, 10, -90));
+        }
+    }
+
+    // Change it to enumerator to make animations
+    IEnumerator HideUnwantedThings(int WorldNo, int LevelNo, int LevelPos)
+    {
+        if (GameController.instance.Worlds[WorldNo - 1] != null)
+        {
+            GameController.instance.Worlds[WorldNo - 1].GetComponent<Animator>().SetBool("world", false);
+        }
+
+        GameController.instance.SlideButtons.gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.3f);
+        GameController.instance.FadeScreen.gameObject.SetActive(true);
+        GameController.instance.FadeScreen.GetComponent<Animator>().SetBool("fade", true);
+        yield return new WaitForSeconds(0.8f);
+        SceneManager.LoadSceneAsync(WorldNo);
+        GameController.instance.SetWorldNLevelNum(WorldNo, LevelNo, LevelPos);
+        GameController.Rots = 0;
+    }
+
+    public void ResetGame()
+    {
+        if (!GameController.PlayerPositionToggle)
+        {
+            Transform plr = GameObject.Find("Player" + GameController.instance.LevelNum).transform;
+            GameController.PlayerPositionToggle = true;
+            GameController.Rots = 0;
+            GameController.instance.SetRotsTxt(0);
+
+            PlayerController ppp = plr.GetComponent<PlayerController>();
+            ppp.ResetAfterReset();
+            ppp.CallRemoveBlocksOneByOne(0.03f);
+        }
+    }
+
+    public void GetTacticsBack(PlayerController ppp)
+    {
+        for (int i = ppp.Tactics.Count - 1; i >= 0; i--)
+        {
+            GameObject g = ppp.Tactics[i];
+            g.SetActive(true);
+        }
+    }
+
+	
+
+    public void Hints()
+    {
+        int t = GameController.instance.GetHints();
+        Transform g = GameObject.Find("Hints" + GameController.instance.LevelNum).transform;
+           
+
+        if (t > 0 && g.position.y == 15)
+        {
+            
+            g.position = Vector3.zero;
+            t--;
+        }
+        else if (t > 0 && g.position.y == 0)
+        {
+            g.position = new Vector3(0f, 15f, 0f);
+        }
+        else
+        {
+            ShowHintsPurchaseOption();
+        }
+        GameController.instance.SetHints(t);
+        GameController.instance.SetHintsTxt(t);
+        PlayerPrefController.instance.SetHintsKey(t);
+    }
+
+    void ShowHintsPurchaseOption()
+    {
+        print("Showing hints purchase dialouge");
+    }
+
+    // Check which world ui can go when back button pressed
+    public void BackBtn()
+    {
+
+        GameController.instance.InLevelUI.GetComponent<Animator>().SetBool("levelui", false);
+        GameController.instance.LevelsObj.SetActive((false));
+        GameController.instance.Worlds[GameController.instance.WorldNum - 1].GetComponent<Animator>().SetBool("world", true);
+        Invoke("GetSlider", 0.8f);
+    }
+
+    void GetSlider()
+    {
+        GameController.instance.SlideButtons.gameObject.SetActive(true);
+    }
+
+    public void SliderControlRight()
+    {
+        int t = GameController.instance.Slider;
+
+        if (t >= 0 && t < GameController.instance.TotalWorlds - 1)
+        {
+            StartCoroutine(GetNextWorld(t, true));
+            GameController.instance.Slider++;
+        }
+    }
+
+    public void SliderControlLeft()
+    {
+        int t = GameController.instance.Slider;
+        if (t > 0 && t < GameController.instance.TotalWorlds)
+        {
+            StartCoroutine(GetNextWorld(t, false));
+            GameController.instance.Slider--;
+        }
+    }
+
+    IEnumerator GetNextWorld(int t, bool b)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (b)
+        {
+            GameController.instance.Worlds[t].GetComponent<Animator>().SetBool("world", false);
+            yield return new WaitForSeconds(0.05f);
+            GameController.instance.Worlds[t + 1].gameObject.SetActive(true);
+            GameController.instance.Worlds[t + 1].GetComponent<Animator>().SetBool("world", true);
+		
+        }
+        else
+        {
+            GameController.instance.Worlds[t].GetComponent<Animator>().SetBool("world", false);
+            yield return new WaitForSeconds(0.05f);
+            GameController.instance.Worlds[t - 1].gameObject.SetActive(true);
+            GameController.instance.Worlds[t - 1].GetComponent<Animator>().SetBool("world", true);
+		
+        }
+
+
+        if (GameController.instance.TotalWorlds - 2 == t)
+        {
+//			GameController.instance.SlideButtons.GetChild(1).GetComponent<Button>().interactable = false;
+        }
+        else if (GameController.instance.TotalWorlds - 6 == t + 1)
+        {
+//			GameController.instance.SlideButtons.GetChild(0).GetComponent<Button>().interactable = false;
+        }
+        else
+        {
+            GameController.instance.SlideButtons.GetChild(0).GetComponent<Button>().interactable = true;
+            GameController.instance.SlideButtons.GetChild(1).GetComponent<Button>().interactable = true;
+        }
+    }
+
+    void OnLevelWasLoaded(int l)
+    {
+        if (UIManagement.instance.BGClips[l - 1] != null)
+        {
+            UIManagement.instance.MusicSrc.clip = UIManagement.instance.BGClips[l - 1];
+            UIManagement.instance.MusicSrc.Play();
+        }
+    }
+}

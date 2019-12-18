@@ -1,0 +1,121 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Net.NetworkInformation;
+using System.Reflection;
+
+
+public class PlayerPrefController : MonoBehaviour
+{
+    // All the Player Preference datas handled from here
+    public static PlayerPrefController instance;
+    // All the keys used through out the game to persist the values
+    private const string CANKEY = "CANKEY", BESTKEY = "BESTKEY", SOUNDKEY = "SOUNDKEY", MUSICKEY = "MUSICKEY", ISITFIRSTKEY = "ISITRIGHT";
+    private const string CURRENTWORLDKEY = "CURRENTWORLDKEY", HINTSKEY = "HINTSKEY", LOCKKEY = "LOCKKEY";
+
+    void Awake()
+    {
+
+
+        if (instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+    //	public void SetCanKey(string LevelNo, int CanValue)
+    //	{
+    //		PlayerPrefs.SetInt(CANKEY + LevelNo, CanValue);
+    //	}
+    //
+    //	public int GetCanKey(int LeveoNo)
+    //	{
+    //		return PlayerPrefs.GetInt(CANKEY + LeveoNo);
+    //	}
+
+    public void SetBestKey(string LevelNo, int BestValue)
+    {
+        PlayerPrefs.SetInt(BESTKEY + LevelNo, BestValue);
+    }
+
+    public int GetBestKey(string LeveoNo)
+    {
+        return PlayerPrefs.GetInt(BESTKEY + LeveoNo);
+    }
+
+    public void SetSoundKey(int SoundValue)
+    {
+        PlayerPrefs.SetInt(SOUNDKEY, SoundValue);
+    }
+
+    public int GetSoundKey()
+    {
+        return PlayerPrefs.GetInt(SOUNDKEY);
+    }
+
+    public void SetMusicKey(int MusicValue)
+    {
+        PlayerPrefs.SetInt(MUSICKEY, MusicValue);
+    }
+
+    public int GetMusicKey()
+    {
+        return PlayerPrefs.GetInt(MUSICKEY);
+    }
+
+    public int GetIsItFirsttKey()
+    {
+        return PlayerPrefs.GetInt(ISITFIRSTKEY, 0);
+    }
+
+    public void SetIsItFirstKey()
+    {
+        PlayerPrefs.SetInt(ISITFIRSTKEY, 1);
+    }
+
+    public void SetCurrentWorldKey(int w)
+    {
+        PlayerPrefs.SetInt(CURRENTWORLDKEY, w);
+    }
+
+    public int GetCurrentWorldKey()
+    {
+        return PlayerPrefs.GetInt(CURRENTWORLDKEY);
+    }
+
+    public void SetHintsKey(int hints)
+    {
+        PlayerPrefs.SetInt(HINTSKEY, hints);
+    }
+
+    public int GetHintsKey()
+    {
+        return PlayerPrefs.GetInt(HINTSKEY, 0);
+    }
+
+    public void SetLocktKey(string LevelNo, int lockValue)
+    {
+        PlayerPrefs.SetInt(LOCKKEY + LevelNo, lockValue);
+    }
+
+    public int GetLockKey(string LevelNo)
+    {
+        return PlayerPrefs.GetInt(LOCKKEY + LevelNo, 0);
+    }
+}

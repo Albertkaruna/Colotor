@@ -1,0 +1,30 @@
+//Defaulse vales for each grid sizes
+
+3 x 3 Grid   =========>>>   Move=1.827, MinMaxX=-1.827, MinMaxY=-1.827
+4 x 4 Grid   =========>>>   Move=1.374, MinMaxX=-2.06, MinMaxY=-2.06
+5 x 5 Grid   =========>>>   Move=1.099, MinMaxX=-2.198, MinMaxY=-2.198
+6 x 6 Grid   =========>>>   Move=0.918, MinMaxX=-2.291, MinMaxY=-2.291
+
+Blue = 11
+Violet = 22
+Yellow = 33
+Rose = 44
+
+World 1
+========
+1.6
+2.5
+3.6
+4.4
+5.5
+
+World 1
+========
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.

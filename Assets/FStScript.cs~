@@ -1,0 +1,50 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEditor;
+using System;
+
+public class FStScript : MonoBehaviour
+{
+    private PlayerController PlayerControl;
+    // Use this for initialization
+    void Start()
+    {
+        PlayerControl = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.name == "11" && gameObject.name == "1")
+        {
+            print(gameObject.name + "   " + col.name);
+            StopMove();
+        }
+        else if (col.name == "22" && gameObject.name == "2")
+        {
+            StopMove();
+        }
+        else if (col.name == "33" && gameObject.name == "3")
+        {
+            StopMove();
+        }
+        else if (col.name == "44" && gameObject.name == "4")
+        {
+            StopMove();
+        }
+        else
+        {
+            print("Dumb");
+        }
+    }
+
+    void StopMove()
+    {
+        PlayerControl.CanMove = false;
+    }
+}

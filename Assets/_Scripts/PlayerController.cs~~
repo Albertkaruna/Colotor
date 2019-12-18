@@ -1,0 +1,325 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Runtime.Remoting.Services;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+
+public class PlayerController : MonoBehaviour
+{
+	//	Moving distance,Clamp value for X and Y and Mouse Threshhold distance
+	public float Move, MinMaxX, MinMaxY, ThreshHoldDistance;
+	// Block used to instantiate on the tail of the player on each move
+	[SerializeField]
+	private GameObject Block;
+	// Weather clock would need to generate or not
+	[SerializeField]
+	private bool DoBlocking = false;
+	// Rotation angle needed for each rotation and rotation freezer count
+	private int RotationAngle = -90, FreezeRCount = 0;
+	// Single Edge rotation restrictions
+	private bool Once1 = true, Once2 = true, Once3 = true, Once4 = true, CanFreezeRotation = false, IsItRight = false;
+	// Threshold for mouse distance before move the player
+	private float ThresholdX, ThresholdY;
+	// If true can move the player else can't move
+	[HideInInspector]
+	public bool CanMove = false;
+	// Player object Rigidbody
+	private Rigidbody2D rigid;
+	private string FreezerName = "";
+	private Vector2 CurrentPos;
+	private List<GameObject> GenBlocks = new List<GameObject>();
+
+	void Awake()
+	{
+		
+	}
+
+	void Start()
+	{
+		rigid = GetComponent<Rigidbody2D>();
+	}
+
+	void Update()
+	{
+      
+
+	}
+
+	void OnMouseDrag()
+	{
+		if (CanMove)
+		{
+			if (GameController.PlayerPositionToggle)
+			{
+				GameController.PlayerPositionToggle = false;
+				GameController.instance.PlayerTransform = transform;
+				print("Toggle");
+			}
+
+			GameController.instance.Ghost.enabled = true;
+			GameController.instance.Ghost.transform.position = transform.position;
+			GameController.instance.Ghost.transform.rotation = transform.rotation;
+			GameController.instance.Ghost.transform.localScale = transform.localScale + new Vector3(0.16f, 0.16f, 0.16f);
+//             Get the mouse position and change it from screen to world coordination
+			Vector2 Mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			CurrentPos = transform.position;
+
+
+			ThresholdX = Mathf.Round((Mousepos.x - CurrentPos.x) * 50f / 50f);
+			ThresholdY = Mathf.Round((Mousepos.y - CurrentPos.y) * 50f / 50f);
+            
+			if (ThresholdX >= ThreshHoldDistance)
+			{
+				transform.position = new Vector2(Mathf.Clamp(CurrentPos.x + Move, MinMaxX, -MinMaxX), CurrentPos.y);
+//				rigid.MovePosition(new Vector2(Mathf.Clamp(CurrentPos.x + Move, MinMaxX, -MinMaxX), CurrentPos.y));
+				
+				if (transform.position.x > MinMaxX && transform.position.x < -MinMaxX)
+				{
+					RotateObject(RotationAngle);
+					Once2 = true;
+				}
+				else if (Once1)
+				{
+					Once1 = false;
+					RotateObject(RotationAngle);
+				}
+			}
+			else if (ThresholdX <= -ThreshHoldDistance)
+			{
+				transform.position = new Vector2(Mathf.Clamp(CurrentPos.x - Move, MinMaxX, -MinMaxX), CurrentPos.y);
+//				rigid.MovePosition(new Vector2(Mathf.Clamp(CurrentPos.x - Move, MinMaxX, -MinMaxX), CurrentPos.y));
+				if (transform.position.x > MinMaxX && transform.position.x < -MinMaxX)
+				{
+					RotateObject(RotationAngle);
+					Once1 = true;
+				}
+				else if (Once2)
+				{
+					Once2 = false;
+					RotateObject(RotationAngle);
+				}
+			}
+			else if (ThresholdY >= ThreshHoldDistance)
+			{
+				transform.position = new Vector2(CurrentPos.x, Mathf.Clamp(CurrentPos.y + Move, MinMaxY, -MinMaxY));
+//				rigid.MovePosition(new Vector2(CurrentPos.x, Mathf.Clamp(CurrentPos.y + Move, MinMaxY, -MinMaxY)));
+				if (transform.position.y > MinMaxY && transform.position.y < -MinMaxY)
+				{
+					RotateObject(RotationAngle);
+					Once4 = true;
+				}
+				else if (Once3)
+				{
+					Once3 = false;
+					RotateObject(RotationAngle);
+				}
+			}
+			else if (ThresholdY <= -ThreshHoldDistance)
+			{
+				transform.position = new Vector2(CurrentPos.x, Mathf.Clamp(CurrentPos.y - Move, MinMaxY, -MinMaxY));
+//				rigid.MovePosition(new Vector2(CurrentPos.x, Mathf.Clamp(CurrentPos.y - Move, MinMaxY, -MinMaxY)));
+				if (transform.position.y > MinMaxY && transform.position.y < -MinMaxY)
+				{
+					RotateObject(RotationAngle);
+					Once3 = true;
+				}
+				else if (Once4)
+				{
+					Once4 = false;
+					RotateObject(RotationAngle);
+				}
+			}
+		}
+
+	}
+
+	// Rotate the player to given angle
+	void RotateObject(int s)
+	{
+		transform.Rotate(0, 0, transform.rotation.z + s, Space.Self);
+//		rigid.MoveRotation(transform.rotation.z + s);
+		RoundUPRotation();
+		if (CanFreezeRotation)
+		{
+			FreezeRCount++;
+		}
+		if (FreezeRCount == 1 && FreezerName == "F1Freezer")
+		{
+			CanFreezeRotation = false;
+			FreezeRCount = 0;
+			RotationAngle = 90;
+		}
+		else if (FreezeRCount == 2 && FreezerName == "F2Freezer")
+		{
+			CanFreezeRotation = false;
+			FreezeRCount = 0;
+			RotationAngle = 90;
+		}
+		else if (FreezeRCount == 3 && FreezerName == "F3Freezer")
+		{
+			CanFreezeRotation = false;
+			FreezeRCount = 0;
+			RotationAngle = 90;
+			FreezerName = "";
+		}
+
+		GenerateBlock();
+// Counts number of rots and sets it to rots text
+		GameController.instance.Rots += 1;
+		GameController.instance.SetRotsTxt(GameController.instance.Rots);
+
+	}
+
+	// If DoBlocking is true then it will instantiate Blocks behind the player and adds its to List
+	void GenerateBlock()
+	{
+		if (DoBlocking)
+		{
+			if (Block != null)
+			{
+				GameObject block = Instantiate(Block, CurrentPos, Quaternion.identity) as GameObject;
+				block.transform.localScale = transform.localScale;
+				GenBlocks.Add(block);
+			}
+		}
+	}
+
+	// Executes when mouse up or touch ends
+	void OnMouseUp()
+	{
+		RoundUPRotation();
+		GameController.instance.Ghost.enabled = false;
+	}
+
+	// When touch ends or mouse up then round the player rotation to nearer angle
+	void RoundUPRotation()
+	{
+		var vec = transform.eulerAngles;
+		vec.z = Mathf.Round(vec.z / 90) * 90;
+		transform.eulerAngles = vec;
+	}
+
+	// Setter for RotationAngle
+	public void SetRotationAngle(int RotationAngle)
+	{
+		this.RotationAngle = RotationAngle;
+	}
+
+	// Getter for RotationAngle
+	public int GetRotationAngle()
+	{
+		return RotationAngle;
+	}
+
+	public void SetIsItRight(bool IsItRight)
+	{
+		this.IsItRight = IsItRight;
+	}
+
+	public bool GetIsItRight()
+	{
+		return IsItRight;
+	}
+
+	void OnTriggerEnter2D(Collider2D col)
+	{
+		if (col.tag == "DoubleRotation")
+		{
+			RotationAngle = -180;
+		}
+		else if (col.tag == "TripleRotation")
+		{
+			RotationAngle = -270;
+		}
+		else if (col.tag == "F1Freezer" || col.tag == "F2Freezer" || col.tag == "F3Freezer")
+		{
+			RotationAngle = 0;
+			CanFreezeRotation = true;
+			FreezerName = col.tag;
+			DisableGameObject(col.gameObject);
+		}
+
+// Check for Blocker to end the game.
+		FindBlocker(col);
+// Check for BlockFree to stop block generation
+		CheckBlockFree(col);
+// Check for BlockRemover to remove already generated blocks
+		CheckBlockRemover(col);
+// Check for BlockStarter to start the block generation (If only currently no block is generating)
+		CheckBlockStarter(col);
+	}
+
+	void OnTriggerExit2D(Collider2D col)
+	{
+		if (col.tag == "DoubleRotation")
+		{
+			DisableGameObject(col.gameObject);
+			RotationAngle = -90;
+		}
+		else if (col.tag == "TripleRotation")
+		{
+			DisableGameObject(col.gameObject);
+			RotationAngle = -90;
+		}
+	}
+
+
+	void DisableGameObject(GameObject g)
+	{
+		g.SetActive(false);
+	}
+
+
+
+	void FindBlocker(Collider2D target)
+	{
+		if (target.tag == "Danger")
+		{
+			print("Game Over");
+//			CanMove = false;   // Uncomment this, its necessary
+		}
+	}
+
+	// When player touches the BlockFree object it will stop the Block generation by setting DoBlocking to false
+	void CheckBlockFree(Collider2D target)
+	{
+		if (target.tag == "BlockFree")
+		{
+			target.gameObject.SetActive(false);
+			DoBlocking = false;
+		}
+	}
+
+	// Check weather player touches the BlockRemover, if touches then it will removes all the generated blocks one by one form the scene
+	void CheckBlockRemover(Collider2D target)
+	{
+		if (target.tag == "BlockRemover")
+		{			
+			target.gameObject.SetActive(false);
+			StartCoroutine(RemoveBlocksOneByOne());
+		}
+	}
+
+	IEnumerator RemoveBlocksOneByOne()
+	{
+		for (int i = GenBlocks.Count - 1; i >= 0; i--)
+		{
+			yield return new WaitForSeconds(0.1f);    
+			GameObject g = GenBlocks[i];
+			g.SetActive(false);
+		}
+	}
+
+	// Check weather player touches the BlockStarter, if touches then start generating blocking from the next move
+	void CheckBlockStarter(Collider2D col)
+	{
+		if (col.tag == "BlockStarter")
+		{
+			col.gameObject.SetActive(false);
+			if (!DoBlocking)
+				DoBlocking = true;
+		}
+	}
+}

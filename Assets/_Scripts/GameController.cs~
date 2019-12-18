@@ -1,0 +1,462 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+using System.Security.Cryptography;
+using UnityEngine.SceneManagement;
+
+/*  __/\\\________/\\\____________________________________________________________________________________________________________________        
+_\/\\\_______\/\\\____________________________________________________________________________________________________________________       
+_\/\\\_______\/\\\____/\\\__/\\\___/\\\\\\\\\________________________________________________________________/\\\_____________________      
+_\/\\\\\\\\\\\\\\\___\//\\\/\\\___/\\\/////\\\_____/\\\\\\\\___/\\/\\\\\\\___/\\\\\\\\\\\_____/\\\\\\\\___/\\\\\\\\\\\__/\\\\\\\\\____     
+_\/\\\/////////\\\____\//\\\\\___\/\\\\\\\\\\____/\\\/////\\\_\/\\\/////\\\_\///////\\\/____/\\\/////\\\_\////\\\////__\////////\\\___    
+_\/\\\_______\/\\\_____\//\\\____\/\\\//////____/\\\\\\\\\\\__\/\\\___\///_______/\\\/_____/\\\\\\\\\\\_____\/\\\________/\\\\\\\\\\__   
+_\/\\\_______\/\\\__/\\_/\\\_____\/\\\_________\//\\///////___\/\\\____________/\\\/______\//\\///////______\/\\\_/\\___/\\\/////\\\__  
+_\/\\\_______\/\\\_\//\\\\/______\/\\\__________\//\\\\\\\\\\_\/\\\__________/\\\\\\\\\\\__\//\\\\\\\\\\____\//\\\\\___\//\\\\\\\\/\\_ 
+_\///________\///___\////________\///____________\//////////__\///__________\///////////____\//////////______\/////_____\////////\//__  */
+using System;
+
+
+public class GameController : MonoBehaviour
+{
+    //    Game conroller to handle the UI data
+    public static GameController instance;
+
+    public Transform PlayBtnStuff, SettingBtn, SettingPanel, FadeScreen, InLevelUI, HintsBtn, SlideButtons;
+    // Display texts of can,rots and best
+    [SerializeField]
+    private Text CanTxt, RotsTxt, BestTxt, HintsTxt;
+    // It holds all the transform of the world
+    public Transform[] Worlds;
+    // Variables to store Can and Best value
+    private int Can, Best;
+    // Rots variable, Global Reference for current world and level
+    [HideInInspector]
+    public int WorldNum, LevelNum, Hints, LevelPos, Slider = 0, TotalWorlds = 6;
+    public static int Rots;
+    // Global Reference to the levels holder in each world
+    [HideInInspector]
+    public GameObject LevelsObj;
+    // Register all best keys once in a life time
+    private bool IsItFirst = true;
+    // Arrays for each and every worlds to store the can value
+    private int[] World1, World2, World3, World4, World5, World6;
+    [HideInInspector]
+    public SpriteRenderer Ghost;
+    //	 Player transform to store it's initial transform
+    [HideInInspector]
+    public Vector3 PlayerPosition;
+    [HideInInspector]
+    public Quaternion PlayerRotation;
+    [HideInInspector]
+    public PlayerController CurrentPlayer;
+    public static bool PlayerPositionToggle = true;
+
+    void Awake()
+    {
+        if (instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        World1 = new int[5]{ 6, 5, 6, 4, 5 };
+        World2 = new int[6]{ 6, 4, 7, 9, 6, 8 };
+        World3 = new int[8]{ 6, 12, 9, 7, 7, 8, 11, 8 };
+        World4 = new int[8]{ 8, 14, 10, 7, 10, 12, 10, 14 };
+        World5 = new int[9]{ 26, 12, 13, 16, 18, 14, 11, 14, 20 };
+        World6 = new int[10]{ 33, 22, 16, 19, 34, 29, 16, 41, 12, 36 };
+
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        PlayerPrefController.instance.SetHintsKey(30); // Remove it before release the game 
+        if (PlayerPrefController.instance.GetIsItFirsttKey() == 0)
+        {
+            PlayerPrefController.instance.SetIsItFirstKey();
+            PlayerPrefController.instance.SetHintsKey(3);
+        }
+
+        InitializeBest();
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+    public void SetCan(int Can)
+    {
+        this.Can = Can;
+    }
+
+    public int GetCan()
+    {
+        return this.Can;
+    }
+
+
+    public void SetBest()
+    {
+        this.Best = Best;
+    }
+
+    public int GetBest()
+    {
+        return this.Best;
+    }
+
+
+    public void SetCanTxt(int CanTxt)
+    {
+        this.CanTxt.text = "Can: " + CanTxt.ToString();
+    }
+
+    public string GetCanTxt()
+    {
+        return this.CanTxt.text.ToString();
+    }
+
+    public void SetRotsTxt(int RotsTxt)
+    {
+        this.RotsTxt.text = "Rots: " + RotsTxt.ToString();
+    }
+
+    public string GetRotsTxt()
+    {
+        return this.RotsTxt.text.ToString();
+    }
+
+    public void SetBestTxt(int BestTxt)
+    {
+        this.BestTxt.text = "Best: " + BestTxt.ToString();
+    }
+
+    public string GetBestTxt()
+    {
+        return this.BestTxt.text.ToString();
+    }
+
+    public void SetHints(int Hints)
+    {
+        this.Hints = Hints;
+    }
+
+    public int GetHints()
+    {
+        return this.Hints;
+    }
+
+    public void SetHintsTxt(int Hints)
+    {
+        this.HintsTxt.text = Hints.ToString();
+    }
+
+    public string GetHintsTxt()
+    {
+        return this.HintsTxt.text.ToString();
+    }
+
+
+
+    // Initially registers the bestkey to each level
+    void InitializeBest()
+    {
+        int NoOfWorlds = 6;
+        int[] CurrentWorld = World1;
+	
+        for (int i = 1; i <= NoOfWorlds; i++)
+        {
+            for (int j = 0; j <= CurrentWorld.Length - 1; j++)
+            {
+//				PlayerPrefController.instance.SetBestKey(i + "" + j, 0); // Bestkey initialization
+//				PlayerPrefController.instance.SetLocktKey(i + "" + j, 0); // Lock key initialization
+                UnlockAllLevels(i, j + 1);
+
+            }
+            if (i == 1)
+            {
+                CurrentWorld = World1;
+            }
+            else if (i == 2)
+            {
+                CurrentWorld = World2;
+            }
+            else if (i == 3)
+            {
+                CurrentWorld = World3;
+            }
+            else if (i == 4)
+            {
+                CurrentWorld = World4;
+            }
+            else if (i == 5)
+            {
+                CurrentWorld = World5;
+            }
+            else if (i == 6)
+            {
+                CurrentWorld = World6;
+            }
+        }
+    }
+
+    void UnlockAllLevels(int w, int l)
+    {
+        if (w == 1 && (l > 1 && l <= 5))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {  
+                Transform t = Worlds[w - 1].GetChild(l).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+        else if (w == 2 && (l > 1 && l <= 6))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {
+                Transform t = Worlds[w - 1].GetChild(l).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+        else if (w == 3 && (l > 1 && l <= 8))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {
+                Transform t = Worlds[w - 1].GetChild(l).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+        else if (w == 4 && (l > 1 && l <= 8))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {
+                Transform t = Worlds[w - 1].GetChild(l).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+        else if (w == 5 && (l > 1 && l <= 9))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {
+                Transform t = null;
+                if (l <= 4)
+                {
+                    t = Worlds[w - 1].GetChild(1).transform.GetChild(l - 1).transform;
+                }
+                else if (l >= 5 && l <= 8)
+                {
+                    t = Worlds[w - 1].GetChild(2).transform.GetChild(l - 1).transform;
+                }
+                else if (l == 9)
+                {
+                    t = Worlds[w - 1].GetChild(3).transform;
+                }
+
+
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+        else if (w == 6 && (l > 1 && l <= 10))
+        {
+            if (PlayerPrefController.instance.GetLockKey(w + "" + l) == 1)
+            {
+                Transform t = Worlds[w - 1].GetChild(l).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void OnLevelWasLoaded(int n)
+    {
+        LevelsObj = GameObject.FindGameObjectWithTag("Levels");
+        Ghost = Ghost = GameObject.FindGameObjectWithTag("Ghost").GetComponent<SpriteRenderer>();
+        SetHints(PlayerPrefController.instance.GetHintsKey());
+        SetHintsTxt(GetHints());
+        WorldNum = SceneManager.GetActiveScene().buildIndex;
+    }
+
+    // Setting the can value to proper level with given array value
+    public void SetCanValue(int n)
+    {
+        int[] CurrentWorld = World1;
+        float XValue = 0;
+        if (LevelsObj != null)
+        {
+            XValue = LevelsObj.transform.position.x;
+        }
+        int ArrCount = 0;
+        float XValueCompare = 0;
+        if (n == 1)
+        {
+            ArrCount = World1.Length;
+            CurrentWorld = World1;
+        }
+        else if (n == 2)
+        {
+            ArrCount = World2.Length;
+            CurrentWorld = World2;
+        }
+        else if (n == 3)
+        {
+            ArrCount = World3.Length;
+            CurrentWorld = World3;
+        }
+        else if (n == 4)
+        {
+            ArrCount = World4.Length;
+            CurrentWorld = World4;
+        }
+        else if (n == 5)
+        {
+            ArrCount = World5.Length;
+            CurrentWorld = World5;
+        }
+        else if (n == 6)
+        {
+            ArrCount = World6.Length;
+            CurrentWorld = World6;
+        }
+
+        for (int i = 0; i < ArrCount; i++)
+        {
+			
+            if (Mathf.RoundToInt(XValue) == XValueCompare)
+            {
+                SetCanTxt(CurrentWorld[i]);
+                SetBestValue();
+                XValueCompare = 0;
+                break;
+            }
+            else
+            {
+                XValueCompare -= 10;
+            }
+        }
+    }
+
+    // Setting best value to the best text
+    void SetBestValue()
+    {
+        Best = PlayerPrefController.instance.GetBestKey(WorldNum + "" + LevelNum);
+        SetBestTxt(Best);
+    }
+
+
+    // Stoting the best finish value at each level
+    public void StoreBestValue()
+    {
+        int t = PlayerPrefController.instance.GetBestKey(WorldNum + "" + LevelNum);
+        if (t == 0)
+        {
+            PlayerPrefController.instance.SetBestKey(WorldNum + "" + LevelNum, Rots);
+        }
+        else if (Rots < t)
+        {
+            PlayerPrefController.instance.SetBestKey(WorldNum + "" + LevelNum, Rots);
+        }
+
+        print("T: " + t + "  " + "Rots: " + Rots);
+//		LevelNum++;
+        Rots = 0;
+        SetRotsTxt(Rots);
+    }
+
+    public void SetWorldNLevelNum(int Worldno, int Levelno, int LevelPos)
+    {
+        this.WorldNum = Worldno;
+        this.LevelNum = Levelno;
+        this.LevelPos = LevelPos;
+    }
+
+    public void UnlockNextLevel()
+    {
+        
+//		print(WorldNum + " " + LevelNum);
+        try
+        {
+            if (WorldNum == 1 && LevelNum <= 5)
+            {
+                Transform t = Worlds[WorldNum - 1].GetChild(LevelNum).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+            else if (WorldNum == 2 && LevelNum <= 6)
+            {
+                Transform t = Worlds[WorldNum - 1].GetChild(LevelNum).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+            else if (WorldNum == 3 && LevelNum <= 8)
+            {
+                Transform t = Worlds[WorldNum - 1].GetChild(LevelNum).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+            else if (WorldNum == 4 && LevelNum <= 8)
+            {
+                Transform t = Worlds[WorldNum - 1].GetChild(LevelNum).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+            else if (WorldNum == 5 && LevelNum <= 9)
+            {
+                Transform t = null;
+                if (LevelNum <= 4)
+                {
+                    t = Worlds[WorldNum - 1].GetChild(1).transform.GetChild(LevelNum).transform;
+                }
+                else if (LevelNum >= 5 && LevelNum <= 8)
+                {
+                    t = Worlds[WorldNum - 1].GetChild(2).transform.GetChild(LevelNum).transform;
+                }
+                else if (LevelNum == 9)
+                {
+                    t = Worlds[WorldNum - 1].GetChild(3).transform;
+                }
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+            else if (WorldNum == 6 && LevelNum <= 10)
+            {
+                Transform t = Worlds[WorldNum - 1].GetChild(LevelNum).transform;
+                t.GetComponent<Button>().interactable = true;
+                t.GetChild(0).gameObject.SetActive(true);
+                t.GetChild(1).gameObject.SetActive(false);
+                PlayerPrefController.instance.SetLocktKey(WorldNum + "" + LevelNum, 1);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.Log(ex);   
+        }
+    }
+}

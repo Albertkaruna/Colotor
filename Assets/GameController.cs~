@@ -1,0 +1,44 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class GameController : MonoBehaviour
+{
+    public static GameController instance;
+    [SerializeField]
+    private int Can, Rots, Best;
+    [SerializeField]
+    private Text CanTxt, RotsTxt, BestTxt;
+
+
+
+    void Awake()
+    {
+        if (instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+            
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+	
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+
+
+    
+}

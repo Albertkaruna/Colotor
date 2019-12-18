@@ -1,0 +1,20 @@
+{
+  "version": "10.2.0",
+  "group": "Mediation/FYBHZMediationTestSuite",
+  "patches": [],
+  "libs": [
+    "Fyber/iOS/mediation/FYBHZMediationTestSuite/FYBHZMediationTestSuite.framework:<group>",
+  ],
+  "librarysearchpaths": [],
+  "frameworks": [
+  ],
+  "frameworksearchpaths": [
+    "Fyber/iOS/mediation/FYBHZMediationTestSuite/"
+  ],
+  "headerpaths": [],
+  "files": [],
+  "folders": [],
+  "excludes": [],
+  "linkers": [],
+  "plist": []
+}

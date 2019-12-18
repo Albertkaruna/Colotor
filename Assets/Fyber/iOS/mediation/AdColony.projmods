@@ -1,0 +1,61 @@
+{
+  "version": "3.0.4-r2",
+  "group": "Mediation/AdColony",
+  "patches": [],
+  "libs": [
+    "libz.1.2.5.dylib",
+    "Fyber/iOS/mediation/AdColony/Fyber_AdColony_3.0.4-r2.embeddedframework/Fyber_AdColony_3.0.4-r2.framework:<group>"
+  ],
+  "librarysearchpaths":[],
+  "frameworks": [
+    "AdSupport.framework",
+    "AudioToolbox.framework",
+    "AVFoundation.framework",
+    "CoreGraphics.framework",
+    "CoreMedia.framework",
+    "CoreTelephony.framework",
+    "EventKit.framework",
+    "EventKitUI.framework",
+    "JavaScriptCore.framework:weak",
+    "MediaPlayer.framework",
+    "MessageUI.framework",
+    "QuartzCore.framework",
+    "Social.framework",
+    "StoreKit.framework",
+    "SystemConfiguration.framework",
+    "WebKit.framework:weak",
+  ],
+  "frameworksearchpaths": [
+    "Fyber/iOS/mediation/AdColony/Fyber_AdColony_3.0.4-r2.embeddedframework/"
+  ],
+  "headerpaths": [
+  ],
+  "files": [
+  ],
+  "folders": [],	
+  "excludes": [],
+  "linkers": [
+    "-ObjC",
+    "-fobjc-arc"],
+  "plist": [
+    "
+    <plist>
+      <key>name</key>
+      <string>AdColony</string>
+      <key>settings</key>
+
+      <dict>
+      <!-- Uncomment this section if you want to override the server side configuration properties
+        <key>SPAdColonyAppId</key>
+        <string></string>
+        <key>SPAdColonyV4VCZoneId</key>
+        <string></string>
+        <key>SPAdColonyInterstitialZoneId</key>
+        <string></string>
+      -->
+      </dict>
+      
+    </plist>
+    
+    "]
+}

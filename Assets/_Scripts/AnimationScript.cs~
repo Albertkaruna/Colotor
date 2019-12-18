@@ -1,0 +1,63 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class AnimationScript : MonoBehaviour
+{
+
+    // Use this for initialization
+    void Start()
+    {
+	
+    }
+	
+    // Update is called once per frame
+    void Update()
+    {
+	
+    }
+
+    public void PlayButton()
+    {
+        StartCoroutine(WaitAndDo(1, 0.1f));
+    }
+
+    IEnumerator WaitAndDo(int c, float delay)
+    {
+
+        yield return new WaitForSeconds(delay);
+        if (c == 1)
+        {
+            GameController.instance.Worlds[0].gameObject.SetActive(true);
+        }
+        yield return new WaitForSeconds(0.2f);
+        GameController.instance.PlayBtnStuff.gameObject.SetActive(false);
+        GameController.instance.Worlds[0].GetComponent<Animator>().SetBool("world", true);
+
+        GameController.instance.SlideButtons.gameObject.SetActive(true);
+    }
+
+    void FadeInEnd()
+    {
+        GameController.instance.FadeScreen.GetComponent<Animator>().SetBool("fade", false);
+    }
+
+    void FadeOutEnd()
+    {
+        StartCoroutine(NewWorld());
+    }
+
+    IEnumerator NewWorld()
+    {
+        yield return new WaitForSeconds(0.1f);
+        GameController.instance.LevelsObj = GameObject.Find("Levels");
+        iTween.MoveTo(GameController.instance.LevelsObj, iTween.Hash("x", GameController.instance.LevelPos, "time", 0.5f, "easetype", iTween.EaseType.easeOutElastic));
+        yield return new WaitForSeconds(0.5f);
+        iTween.ScaleTo(GameController.instance.LevelsObj.transform.GetChild(GameController.instance.LevelNum - 1).gameObject, iTween.Hash("scale", Vector3.one, "time", 0.5f, "easetype", iTween.EaseType.easeOutElastic));      
+        yield return new WaitForSeconds(0.2f);
+        GameController.instance.InLevelUI.gameObject.SetActive(true);
+        GameController.instance.SetCanValue(GameController.instance.WorldNum);
+        GameController.instance.InLevelUI.GetComponent<Animator>().SetBool("levelui", true);
+        GameController.instance.FadeScreen.gameObject.SetActive(false);
+    }
+
+}
